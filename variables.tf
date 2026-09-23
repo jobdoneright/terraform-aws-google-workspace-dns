@@ -22,7 +22,7 @@ variable "mx_records" {
 }
 
 variable "ttl" {
-  description = "TTL in seconds for the MX and CNAME records."
+  description = "TTL in seconds for the MX, CNAME and DKIM records."
   type        = number
   default     = 3600
 }
@@ -31,4 +31,21 @@ variable "tags" {
   description = "Tags to apply to the hosted zone."
   type        = map(string)
   default     = {}
+}
+
+variable "dkim_record" {
+  description = "DKIM TXT record value from the Google Admin console, e.g. `v=DKIM1; k=rsa; p=MIIB...`. No record is created when null."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.dkim_record == null || can(regex("^v=DKIM1;", var.dkim_record))
+    error_message = "The dkim_record must start with \"v=DKIM1;\"."
+  }
+}
+
+variable "dkim_selector" {
+  description = "DKIM selector prefix. The record is created at `<selector>._domainkey`."
+  type        = string
+  default     = "google"
 }
