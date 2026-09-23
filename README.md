@@ -7,6 +7,7 @@ It creates:
 - a Route53 hosted zone for `dns_zone`
 - Google's MX records at the zone apex
 - CNAMEs to `ghs.googlehosted.com` for `mail`, `cal` and `docs` (configurable)
+- an optional DKIM TXT record at `google._domainkey`
 
 ## Usage
 
@@ -26,6 +27,14 @@ To use Google's current single MX record, add:
 ```hcl
   mx_records = ["1 SMTP.GOOGLE.COM."]
 ```
+
+To publish DKIM, generate a key in the Google Admin console (Apps > Google Workspace > Gmail > Authenticate email) and pass the TXT value:
+
+```hcl
+  dkim_record = "v=DKIM1; k=rsa; p=MIIBIjANBgkqh..."
+```
+
+Values over 255 characters, such as 2048-bit keys, are split into chunks as Route53 requires. Set `dkim_selector` if you chose a prefix other than `google`.
 
 See [examples/basic](examples/basic).
 
@@ -58,6 +67,7 @@ Terraform 1.1 or later is required.
 | Name | Type |
 | ---- | ---- |
 | [aws_route53_record.cname](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
+| [aws_route53_record.dkim](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
 | [aws_route53_record.mx](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
 | [aws_route53_zone.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_zone) | resource |
 
@@ -66,10 +76,12 @@ Terraform 1.1 or later is required.
 | Name | Description | Type | Default | Required |
 | ---- | ----------- | ---- | ------- | :------: |
 | dns\_zone | Domain name of the Route53 hosted zone to create, e.g. `example.com`. | `string` | n/a | yes |
+| dkim\_record | DKIM TXT record value from the Google Admin console, e.g. `v=DKIM1; k=rsa; p=MIIB...`. No record is created when null. | `string` | `null` | no |
+| dkim\_selector | DKIM selector prefix. The record is created at `<selector>._domainkey`. | `string` | `"google"` | no |
 | gsuite\_cnames | Subdomains to CNAME to `ghs.googlehosted.com` for Google Workspace custom URLs. | `list(string)` | <pre>[<br/>  "mail",<br/>  "cal",<br/>  "docs"<br/>]</pre> | no |
 | mx\_records | MX record values. The default is Google's legacy five-record set; Google now also accepts the single record `1 SMTP.GOOGLE.COM.`. | `list(string)` | <pre>[<br/>  "1 ASPMX.L.GOOGLE.COM.",<br/>  "5 ALT1.ASPMX.L.GOOGLE.COM.",<br/>  "5 ALT2.ASPMX.L.GOOGLE.COM.",<br/>  "10 ALT3.ASPMX.L.GOOGLE.COM.",<br/>  "10 ALT4.ASPMX.L.GOOGLE.COM."<br/>]</pre> | no |
 | tags | Tags to apply to the hosted zone. | `map(string)` | `{}` | no |
-| ttl | TTL in seconds for the MX and CNAME records. | `number` | `3600` | no |
+| ttl | TTL in seconds for the MX, CNAME and DKIM records. | `number` | `3600` | no |
 
 ## Outputs
 

@@ -42,3 +42,56 @@ run "custom_records" {
     error_message = "CNAME list and TTL should be overridable."
   }
 }
+
+run "no_dkim_by_default" {
+  command = plan
+
+  assert {
+    condition     = length(aws_route53_record.dkim) == 0
+    error_message = "No DKIM record should be created without dkim_record."
+  }
+}
+
+run "dkim_short_key" {
+  command = plan
+
+  variables {
+    dkim_record   = "v=DKIM1; k=rsa; p=ABC123"
+    dkim_selector = "gw"
+  }
+
+  assert {
+    condition     = aws_route53_record.dkim[0].name == "gw._domainkey"
+    error_message = "DKIM record name should use dkim_selector."
+  }
+
+  assert {
+    condition     = aws_route53_record.dkim[0].records == toset(["v=DKIM1; k=rsa; p=ABC123"])
+    error_message = "Short DKIM value should not be split."
+  }
+}
+
+run "dkim_long_key_is_split" {
+  command = plan
+
+  variables {
+    dkim_record = "v=DKIM1; k=rsa; p=${join("", [for i in range(40) : "ABCDEFGHIJ"])}"
+  }
+
+  assert {
+    condition = aws_route53_record.dkim[0].records == toset([
+      "v=DKIM1; k=rsa; p=${join("", [for i in range(23) : "ABCDEFGHIJ"])}ABCDEFG\"\"HIJ${join("", [for i in range(16) : "ABCDEFGHIJ"])}"
+    ])
+    error_message = "DKIM value over 255 characters should be split into 255-character chunks."
+  }
+}
+
+run "dkim_rejects_invalid_value" {
+  command = plan
+
+  variables {
+    dkim_record = "p=ABC123"
+  }
+
+  expect_failures = [var.dkim_record]
+}

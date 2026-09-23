@@ -21,6 +21,18 @@ resource "aws_route53_record" "cname" {
   records = ["ghs.googlehosted.com"]
 }
 
+# Route53 limits each TXT string to 255 characters. A 2048-bit key is longer,
+# so split it into chunks joined by `""`, which Route53 stores as one value.
+resource "aws_route53_record" "dkim" {
+  count = var.dkim_record == null ? 0 : 1
+
+  zone_id = aws_route53_zone.this.zone_id
+  name    = "${var.dkim_selector}._domainkey"
+  type    = "TXT"
+  ttl     = var.ttl
+  records = [join("\"\"", regexall(".{1,255}", var.dkim_record))]
+}
+
 # Upgrade path from the pre-1.0 resource addresses. The CNAME moves cover the
 # default gsuite_cnames list; custom lists need `terraform state mv`.
 moved {
