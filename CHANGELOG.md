@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.0](https://github.com/jobdoneright/terraform-aws-google-workspace-dns/compare/v0.1.1...v0.2.0) (2026-09-23)
+
+
+### Features
+
+* add optional DKIM TXT record ([276f243](https://github.com/jobdoneright/terraform-aws-google-workspace-dns/commit/276f24339af985239095bf5c6ca0ebd8de628305))
+* add optional DKIM TXT record ([4c2560f](https://github.com/jobdoneright/terraform-aws-google-workspace-dns/commit/4c2560f31268a65e10c87f91acb709f91cef702f))
+
 ## [0.1.1](https://github.com/jobdoneright/terraform-aws-google-workspace-dns/compare/v0.1.0...v0.1.1) (2026-09-23)
 
 
