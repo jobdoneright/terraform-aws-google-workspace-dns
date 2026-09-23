@@ -1,39 +1,49 @@
-resource "aws_route53_zone" "dns_zone" {
-  name = "${var.dns_zone}"
+resource "aws_route53_zone" "this" {
+  name = var.dns_zone
+  tags = var.tags
 }
 
-# data "aws_route53_zone" "dns_zone" {
-#  # name = "${var.dns_zone}."
-#  name = "${var.dns_zone}"
-# }
-
-resource "aws_route53_record" "gmail_mx" {
-  zone_id = "${aws_route53_zone.dns_zone.zone_id}"
-  type    = "MX"
+resource "aws_route53_record" "mx" {
+  zone_id = aws_route53_zone.this.zone_id
   name    = ""
-  ttl     = 3600
-
-  records = ["1 ASPMX.L.GOOGLE.COM.",
-    "5 ALT1.ASPMX.L.GOOGLE.COM.",
-    "5 ALT2.ASPMX.L.GOOGLE.COM.",
-    "10 ALT3.ASPMX.L.GOOGLE.COM.",
-    "10 ALT4.ASPMX.L.GOOGLE.COM.",
-  ]
+  type    = "MX"
+  ttl     = var.ttl
+  records = var.mx_records
 }
 
-variable "gsuite_cnames" {
-  default = ["mail", "cal", "docs"]
-}
+resource "aws_route53_record" "cname" {
+  for_each = toset(var.gsuite_cnames)
 
-resource "aws_route53_record" "gsuite_cnames" {
-  count   = "${length(var.gsuite_cnames)}"
-  zone_id = "${aws_route53_zone.dns_zone.zone_id}"
-  name    = "${element(var.gsuite_cnames, count.index)}"
+  zone_id = aws_route53_zone.this.zone_id
+  name    = each.key
   type    = "CNAME"
+  ttl     = var.ttl
   records = ["ghs.googlehosted.com"]
-  ttl     = 3600
 }
 
-output "r53_zone_id" {
-  value = "${aws_route53_zone.dns_zone.zone_id}"
+# Upgrade path from the pre-1.0 resource addresses. The CNAME moves cover the
+# default gsuite_cnames list; custom lists need `terraform state mv`.
+moved {
+  from = aws_route53_zone.dns_zone
+  to   = aws_route53_zone.this
+}
+
+moved {
+  from = aws_route53_record.gmail_mx
+  to   = aws_route53_record.mx
+}
+
+moved {
+  from = aws_route53_record.gsuite_cnames[0]
+  to   = aws_route53_record.cname["mail"]
+}
+
+moved {
+  from = aws_route53_record.gsuite_cnames[1]
+  to   = aws_route53_record.cname["cal"]
+}
+
+moved {
+  from = aws_route53_record.gsuite_cnames[2]
+  to   = aws_route53_record.cname["docs"]
 }
