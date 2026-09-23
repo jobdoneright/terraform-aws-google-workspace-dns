@@ -21,23 +21,17 @@ module "google_workspace_dns" {
 
 Delegate the domain to the zone by setting the `name_servers` output at your registrar.
 
-To use Google's current single MX record:
+To use Google's current single MX record, add:
 
 ```hcl
-module "google_workspace_dns" {
-  source  = "jobdoneright/google-workspace-dns/aws"
-  version = "~> 1.0"
-
-  dns_zone   = "example.com"
   mx_records = ["1 SMTP.GOOGLE.COM."]
-}
 ```
 
 See [examples/basic](examples/basic).
 
-## Upgrading from pre-1.0
+## Upgrading from the untagged module
 
-Version 1.0 renames resources and switches the CNAMEs from `count` to `for_each`. `moved` blocks migrate state automatically for the default `gsuite_cnames` list. With a custom list, move each record by hand:
+Version 0.1.0 renames resources and switches the CNAMEs from `count` to `for_each`. `moved` blocks migrate state automatically for the default `gsuite_cnames` list. With a custom list, move each record by hand:
 
 ```sh
 terraform state mv 'module.<name>.aws_route53_record.gsuite_cnames[0]' 'module.<name>.aws_route53_record.cname["<subdomain>"]'
