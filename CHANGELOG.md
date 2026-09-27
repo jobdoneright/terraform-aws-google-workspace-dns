@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.0](https://github.com/jobdoneright/terraform-aws-google-workspace-dns/compare/v0.2.0...v0.3.0) (2026-09-27)
+
+
+### Features
+
+* add SPF and DMARC records ([8cb162f](https://github.com/jobdoneright/terraform-aws-google-workspace-dns/commit/8cb162f5447d52a77e4274cc863caada41f8e783))
+* add SPF and DMARC records ([731e2a0](https://github.com/jobdoneright/terraform-aws-google-workspace-dns/commit/731e2a0674239c75a64aa58e8292536d98d61822))
+
 ## [0.2.0](https://github.com/jobdoneright/terraform-aws-google-workspace-dns/compare/v0.1.1...v0.2.0) (2026-09-23)
 
 
