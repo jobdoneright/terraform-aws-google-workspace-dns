@@ -17,7 +17,7 @@ It creates:
 ```hcl
 module "google_workspace_dns" {
   source  = "jobdoneright/google-workspace-dns/aws"
-  version = "~> 0.2"
+  version = "~> 0.3"
 
   dns_zone = "example.com"
 }
